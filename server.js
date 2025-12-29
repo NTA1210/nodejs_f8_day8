@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const appRoute = require("./src/routes");
 const json = require("./src/middlewares/json.middleware");
