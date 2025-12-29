@@ -1,9 +1,25 @@
 const pool = require("../config/database");
 
 class Post {
-    async findAll() {
-        const [rows] = await pool.query("select * from posts;");
+    async findAll(limit, offset, filters = {}) {
+        const queryStr = Object.entries(filters)
+            .filter(([_, value]) => value !== void 0)
+            .map(([key, value]) => {
+                value = typeof value === "number" ? value : `"${value}"`;
+                return `${key}=${value}`;
+            })
+            .join(" and ");
+        const [rows] = await pool.query(
+            `select * from posts${
+                queryStr ? ` where ${queryStr}` : ""
+            } limit ${limit} offset ${offset};`
+        );
         return rows;
+    }
+
+    async count() {
+        const [rows] = await pool.query("select count(*) as count from posts;");
+        return rows[0].count;
     }
 
     async findOne(id) {
