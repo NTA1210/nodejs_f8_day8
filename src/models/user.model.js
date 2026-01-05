@@ -32,6 +32,19 @@ class User {
         );
         return insertId;
     }
+
+    async updateRefreshToken(id, token, ttl) {
+        const query = `update users set refresh_token = ?, refresh_expires_at = ? where id = ?`;
+        const [{ affectedRows }] = await pool.query(query, [token, ttl, id]);
+        return affectedRows;
+    }
+
+    async findByRefreshToken(token) {
+        const query =
+            "select * from users where refresh_token = ? and refresh_expires_at >= now();";
+        const [rows] = await pool.query(query, [token]);
+        return rows[0];
+    }
 }
 
 module.exports = new User();
