@@ -94,6 +94,40 @@ const logout = async (req, res) => {
   res.success("Logout thanh cong");
 };
 
+const changePassword = async (req, res) => {
+  const { current_pass, new_pass, confirm_pass } = req.body;
+  const user = req.user;
+
+  console.log(current_pass, new_pass, confirm_pass, user);
+
+  const isValid = await bcrypt.compare(current_pass, user.password);
+  if (!isValid) {
+    return res.error("Mật khẩu hiện tại không đúng", 400);
+  }
+
+  if (new_pass !== confirm_pass) {
+    return res.error("Mật khẩu xác nhận không khớp", 400);
+  }
+
+  const samePassword = await bcrypt.compare(new_pass, user.password);
+  if (samePassword) {
+    return res.error("Mật khẩu mới không được giống mật khẩu hiện tại", 400);
+  }
+
+  const hashedPassword = await bcrypt.hash(new_pass, 10);
+  await userModel.updatePassword(user.id, hashedPassword);
+
+  queueService.push({
+    type: "sendPasswordChangeEmail",
+    payload: {
+      id: user.id,
+      email: user.email,
+    },
+  });
+
+  res.success("Đổi mật khẩu thành công");
+};
+
 module.exports = {
   register,
   login,
@@ -102,4 +136,5 @@ module.exports = {
   verifyEmail,
   resendVerifyEmail,
   logout,
+  changePassword,
 };

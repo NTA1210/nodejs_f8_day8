@@ -1,14 +1,16 @@
 const {
   ACCESS_TOKEN_TTL_SECONDS,
   REFRESH_TOKEN_TTL_DAYS,
+  BCRYPT_SALT_ROUNDS,
 } = require("../config/constants");
 const revokedTokenModel = require("../models/revokedToken.model");
 const userModel = require("../models/user.model");
-const { authSecret, BCRYPT_SALT_ROUNDS } = require("../config/jwt");
+const { authSecret } = require("../config/jwt");
 const jwtUtils = require("../utils/jwt");
 const strings = require("../utils/strings");
 
 const bcrypt = require("bcrypt");
+const queueService = require("./queue.service");
 
 class AuthService {
   responseWithTokens = async (user) => {
@@ -36,6 +38,8 @@ class AuthService {
   };
 
   async register({ email, password }) {
+    console.log(email);
+
     const hash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
     try {
@@ -46,11 +50,11 @@ class AuthService {
       };
 
       queueService.push({
-        type: "sendVerifyEmail",
+        type: "sendVerificationEmail",
         payload: newUser,
       });
 
-      const tokens = await responseWithTokens(newUser);
+      const tokens = await this.responseWithTokens(newUser);
 
       return { user: newUser, tokens };
     } catch (error) {

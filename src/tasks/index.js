@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 const basePath = "./src/tasks";
-const postfix = "Task.js";
+const postfix = ".task.js";
 
 const entries = fs
   .readdirSync(basePath)
@@ -15,5 +15,7 @@ const tasksMap = entries.reduce((obj, fileName) => {
     [fileName.replace(postfix, "")]: require(`./${fileName}`),
   };
 }, {});
+
+console.log(tasksMap);
 
 module.exports = tasksMap;

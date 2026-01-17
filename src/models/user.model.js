@@ -16,8 +16,8 @@ class User {
 
   async findOne(id) {
     const [rows] = await pool.query(
-      `select id, email, first_name, last_name, verified_at, created_at from users where id = ?;`,
-      [id]
+      `select id, email, first_name, last_name, password, verified_at, created_at from users where id = ?;`,
+      [id],
     );
     return rows[0];
   }
@@ -33,7 +33,7 @@ class User {
   async create(email, password) {
     const [{ insertId }] = await pool.query(
       `insert into users (email, password) values (?, ?)`,
-      [email, password]
+      [email, password],
     );
     return insertId;
   }
@@ -60,6 +60,12 @@ class User {
   async clearRefreshToken(id) {
     const query = `update users set refresh_token = null, refresh_expires_at = null where id = ?`;
     const [{ affectedRows }] = await pool.query(query, [id]);
+    return affectedRows;
+  }
+
+  async updatePassword(id, newPassword) {
+    const query = `update users set password = ? where id = ?`;
+    const [{ affectedRows }] = await pool.query(query, [newPassword, id]);
     return affectedRows;
   }
 }

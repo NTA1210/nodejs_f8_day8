@@ -11,9 +11,10 @@ router.post("/verify-email", authController.verifyEmail);
 router.post(
   "/resend-verify-email",
   authRequired,
-  authController.resendVerifyEmail
+  authController.resendVerifyEmail,
 );
 
 router.post("/logout", authRequired, authController.logout);
+router.post("/change-password", authRequired, authController.changePassword);
 
 module.exports = router;

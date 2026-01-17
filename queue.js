@@ -13,31 +13,36 @@ const sleep = require("./src/utils/sleep");
     if (pendingJob) {
       const type = pendingJob.type;
       const payload = JSON.parse(pendingJob.payload);
+      console.log(payload);
 
       try {
         console.log(`Job: "${type}" is processing...`);
         await queueModel.updateStatus(
           pendingJob.id,
-          constants.QUEUE_STATUS.INPROGRESS
+          constants.QUEUE_STATUS.INPROGRESS,
         );
 
         const handler = tasks[type];
+        console.log(handler);
+
         if (!handler) {
           throw new Error(`Khong co task xu ly cho: "${type}"`);
         }
 
         await handler(payload);
 
+        console.log("ádádnạdsa");
+
         await queueModel.updateStatus(
           pendingJob.id,
-          constants.QUEUE_STATUS.COMPLETED
+          constants.QUEUE_STATUS.COMPLETED,
         );
 
         console.log(`Job: "${type}" is processed`);
       } catch (error) {
         await queueModel.updateStatus(
           pendingJob.id,
-          constants.QUEUE_STATUS.FAILED
+          constants.QUEUE_STATUS.FAILED,
         );
       }
     }
