@@ -26,6 +26,19 @@ class EmailService {
     });
     return info;
   }
+
+  async sendBackupReport({ email }) {
+    const info = await transporter.sendMail({
+      from: '"F8" <sondang@fullstack.edu.vn>',
+      to: email,
+      subject: "Backup report",
+      html: `<p>Backup report vao luc ${new Date().toLocaleString()}</p>`,
+    });
+
+    console.log("backup db thanh cong");
+
+    return info;
+  }
 }
 
 module.exports = new EmailService();

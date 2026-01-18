@@ -1,4 +1,6 @@
 const pool = require("../config/database");
+const jwt = require("jsonwebtoken");
+const { authSecret } = require("../config/jwt");
 
 class revokedToken {
   async findOne(token) {
@@ -10,9 +12,20 @@ class revokedToken {
   }
 
   async create(token) {
+    const payload = jwt.verify(token, authSecret);
+
     const data = await pool.query(
-      `INSERT INTO revoked_tokens (access_token) VALUES ('${token}')`,
+      `INSERT INTO revoked_tokens (access_token,expires_at) VALUES ('${token}', '${payload.exp}')`,
     );
+    return data.affectedRows;
+  }
+
+  async deleteExpiredToken() {
+    const data = await pool.query(
+      `DELETE  FROM revoked_tokens WHERE  expires_at < now()`,
+    );
+    console.log(data);
+
     return data.affectedRows;
   }
 }
